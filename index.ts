@@ -20,5 +20,5 @@ app.get('/', (req: Request, res) => {
 });
 
 server.listen(port, () => {
-    console.log(`HTTP, WS порт: ${port}`);
+    console.log(`Сервис запущен, порт - ${port}`);
 });
