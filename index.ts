@@ -18,6 +18,26 @@ app.use(bodyParser.json());
 const server = http.createServer(app);
 const port = 9000;
 
+app.post('/delete', (req, res) => {
+    (new OneCerService()).deleteFile(req.headers, req.body)
+        .then((response) => {
+            res.send(response);
+        })
+        .catch((err) => {
+            res.send(err);
+        });
+});
+
+app.post('/get', (req, res) => {
+    (new OneCerService()).getFile(req.headers, req.body)
+        .then((response) => {
+            res.send(response);
+        })
+        .catch((err) => {
+            res.send(err);
+        });
+});
+
 app.post('/upload', upload.array('files'), (req, res) => {
     if (Array.isArray(req.files)) {
         req.files.forEach((file) => {
@@ -25,7 +45,7 @@ app.post('/upload', upload.array('files'), (req, res) => {
                 const mimetype = mime.extension(file.mimetype);
                 const fileName = `${file.filename}.${mimetype}`;
 
-                (new OneCerService()).uploadFiles(req.headers, req.body, fileName)
+                (new OneCerService()).uploadFile(req.headers, req.body, fileName)
                     .then(({ filePath }) => {
                         if (typeof filePath === 'string') {
                             fs.linkSync(file.path, filePath);
