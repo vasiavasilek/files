@@ -1,16 +1,28 @@
-import axios, { AxiosHeaders, AxiosRequestHeaders } from 'axios';
+import axios from 'axios';
+import { IncomingHttpHeaders } from 'http';
+import { IOneCerUploadResponse } from '../types/1cer';
 
 class OneCerService {
-    public headers: AxiosRequestHeaders = new AxiosHeaders();
+    public uploadFiles = async (headers: IncomingHttpHeaders, body: Record<string, any>, fileName: string): Promise<{filePath?: string}> => {
+        try {
+            const response = await axios<IOneCerUploadResponse>({
+                url: 'https://dev2.1cer.ru/api/files/data/add',
+                method: 'POST',
+                data: {
+                    ...body,
+                    fileName,
+                },
+                headers: {
+                    Authorization: headers.authorization,
+                },
+            });
 
-    public uploadFiles = async (files: Express.Multer.File[]) => {
-        const formData = new FormData();
-
-        const respnse = await axios({
-            url: 'https://dev2.1cer.ru/api/files/data/add',
-            method: 'POST',
-            data: formData,
-        });
+            return {
+                filePath: `F:/dev/1cer-project/temp/${fileName}` || response.data.name,
+            };
+        } catch (err) {
+            return {};
+        }
     };
 }
 
