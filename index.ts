@@ -31,7 +31,10 @@ app.post('/delete', (req, res) => {
 app.post('/get', (req, res) => {
     (new OneCerService()).getFile(req.headers, req.body)
         .then((response) => {
-            res.send(response);
+            if (typeof response.filePath === 'string') {
+                res.sendFile(response.filePath);
+            }
+            res.status(404);
         })
         .catch((err) => {
             res.send(err);

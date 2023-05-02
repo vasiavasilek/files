@@ -1,11 +1,11 @@
 import axios from 'axios';
 import { IncomingHttpHeaders } from 'http';
-import { IOneCerUploadResponse } from '../types/1cer';
+import { IOneCerDeleteResponse, IOneCerGetResponse, IOneCerUploadResponse } from '../types/1cer';
 
 class OneCerService {
-    public deleteFile = async (headers: IncomingHttpHeaders, data: Record<string, any>) => {
+    public deleteFile = async (headers: IncomingHttpHeaders, data: Record<string, any>): Promise<IOneCerDeleteResponse> => {
         try {
-            const response = await axios<IOneCerUploadResponse>({
+            const response = await axios<IOneCerDeleteResponse>({
                 url: 'https://dev2.1cer.ru/api/files/data/delete',
                 method: 'POST',
                 data,
@@ -15,13 +15,15 @@ class OneCerService {
             });
             return response.data;
         } catch (err) {
-            return {};
+            return {
+                error: true,
+            };
         }
     };
 
-    public getFile = async (headers: IncomingHttpHeaders, data: Record<string, any>) => {
+    public getFile = async (headers: IncomingHttpHeaders, data: Record<string, any>): Promise<{filePath?: string}> => {
         try {
-            const response = await axios<IOneCerUploadResponse>({
+            const response = await axios<IOneCerGetResponse>({
                 url: 'https://dev2.1cer.ru/api/files/data/get',
                 method: 'POST',
                 data,
@@ -29,7 +31,9 @@ class OneCerService {
                     Authorization: headers.authorization,
                 },
             });
-            return response.data;
+            return {
+                filePath: response.data.name,
+            };
         } catch (err) {
             return {};
         }
