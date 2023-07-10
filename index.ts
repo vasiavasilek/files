@@ -4,7 +4,10 @@ import multer from 'multer';
 import bodyParser from 'body-parser';
 import mime from 'mime-types';
 import fs from 'fs';
+import dotenv from 'dotenv';
 import OneCerService from './src/integrations/1cer';
+
+dotenv.config();
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -16,7 +19,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 const server = http.createServer(app);
-const port = 9000;
+const port = process.env.PORT || 9000;
 
 app.post('/delete', (req, res) => {
     (new OneCerService()).deleteFile(req.headers, req.body)
