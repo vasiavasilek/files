@@ -6,7 +6,9 @@
   "scripts": {
     "prestart": "npx del-cli dist/",
     "start": "tsc",
-    "poststart": "node dist/index.js"
+    "poststart": "node dist/index.js",
+    "prebuild": "npx del-cli dist/",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
