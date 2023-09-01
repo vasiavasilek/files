@@ -1,4 +1,4 @@
-import http from 'http';
+import http, { IncomingHttpHeaders } from 'http';
 import express from 'express';
 import multer from 'multer';
 import bodyParser from 'body-parser';
@@ -22,7 +22,7 @@ const server = http.createServer(app);
 const port = process.env.PORT || 9000;
 
 app.post('/delete', (req, res) => {
-    (new OneCerService()).deleteFile(req.headers, req.body)
+    (new OneCerService(req.query.api.toString(), req.headers)).deleteFile(req.body)
         .then((response) => {
             res.send(response);
         })
@@ -31,8 +31,17 @@ app.post('/delete', (req, res) => {
         });
 });
 
-app.post('/get', (req, res) => {
-    (new OneCerService()).getFile(req.headers, req.body)
+app.get('/get', (req, res) => {
+    const body = {
+        id: req.query.id,
+        idOwner: req.query.idOwner,
+    };
+
+    const headers = {
+        authorization: `Token ${req.query.token}`,
+    } as IncomingHttpHeaders;
+
+    (new OneCerService(req.query.api.toString(), headers)).getFile(body)
         .then((response) => {
             if (typeof response.filePath === 'string') {
                 res.sendFile(response.filePath);
@@ -51,10 +60,10 @@ app.post('/upload', upload.array('files'), (req, res) => {
                 const mimetype = mime.extension(file.mimetype);
                 const fileName = `${file.filename}.${mimetype}`;
 
-                (new OneCerService()).uploadFile(req.headers, req.body, fileName)
-                    .then(({ filePath }) => {
-                        if (typeof filePath === 'string') {
-                            fs.linkSync(file.path, filePath);
+                (new OneCerService(req.query.api.toString(), req.headers)).uploadFile({ fileName, idOwner: req.body.idOwner })
+                    .then((response) => {
+                        if (typeof response.name === 'string') {
+                            fs.linkSync(file.path, response.name);
                         }
                         fs.unlink(file.path, () => {});
                     })

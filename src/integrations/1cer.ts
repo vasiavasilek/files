@@ -3,28 +3,35 @@ import { IncomingHttpHeaders } from 'http';
 import { IOneCerDeleteResponse, IOneCerGetResponse, IOneCerUploadResponse } from '../types/1cer';
 
 class OneCerService {
+    private api: string;
+
+    private headers: IncomingHttpHeaders;
+
+    public constructor(api: string, headers: IncomingHttpHeaders) {
+        this.api = api;
+        this.headers = headers;
+    }
+
     /**
      * Шаблон запроса
-     * @param headers - заголовки запроса
      * @param config - параметры запроса
      */
-    private request = <T>(headers: IncomingHttpHeaders, config?: AxiosRequestConfig) => axios<T>({
-        baseURL: headers.host,
+    private request = <T>(config?: AxiosRequestConfig) => axios<T>({
+        baseURL: `${this.api}/files/data`,
         headers: {
-            Authorization: headers.authorization,
+            Authorization: this.headers.authorization,
         },
         ...config,
     });
 
     /**
      * Запрос на удаление файла
-     * @param headers - заголовки запроса
      * @param data - параметры запроса
      */
-    public deleteFile = async (headers: IncomingHttpHeaders, data: Record<string, any>): Promise<IOneCerDeleteResponse> => {
+    public deleteFile = async (data: Record<string, any>): Promise<IOneCerDeleteResponse> => {
         try {
-            const response = await this.request<IOneCerDeleteResponse>(headers, {
-                url: '/api/files/data/delete',
+            const response = await this.request<IOneCerDeleteResponse>({
+                url: '/delete',
                 method: 'POST',
                 data,
             });
@@ -38,13 +45,12 @@ class OneCerService {
 
     /**
      * Запрос на получение файла
-     * @param headers - заголовки запроса
      * @param data - параметры запроса
      */
-    public getFile = async (headers: IncomingHttpHeaders, data: Record<string, any>): Promise<{filePath?: string}> => {
+    public getFile = async (data: Record<string, any>): Promise<{filePath?: string}> => {
         try {
-            const response = await this.request<IOneCerGetResponse>(headers, {
-                url: '/api/files/data/get',
+            const response = await this.request<IOneCerGetResponse>({
+                url: '/get',
                 method: 'POST',
                 data,
             });
@@ -58,23 +64,17 @@ class OneCerService {
 
     /**
      * Загрузка файла
-     * @param headers - заголовки запроса
      * @param body - параметры запроса
      * @param fileName - оригинальное имя файла
      */
-    public uploadFile = async (headers: IncomingHttpHeaders, body: Record<string, any>, fileName: string): Promise<{filePath?: string}> => {
+    public uploadFile = async (data: Record<string, any>): Promise<{name?: string; id?: string;}> => {
         try {
-            const response = await this.request<IOneCerUploadResponse>(headers, {
-                url: '/api/files/data/add',
+            const response = await this.request<IOneCerUploadResponse>({
+                url: '/files/data/add',
                 method: 'POST',
-                data: {
-                    ...body,
-                    fileName,
-                },
+                data,
             });
-            return {
-                filePath: response.data.name,
-            };
+            return response.data;
         } catch (err) {
             return {};
         }
