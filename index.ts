@@ -2,7 +2,6 @@ import http, { IncomingHttpHeaders } from 'http';
 import express from 'express';
 import multer from 'multer';
 import bodyParser from 'body-parser';
-import mime from 'mime-types';
 import fs from 'fs';
 import dotenv from 'dotenv';
 import OneCerService from './src/integrations/1cer';
@@ -58,8 +57,7 @@ app.post('/upload', upload.array('files'), (req, res) => {
     if (Array.isArray(req.files)) {
         req.files.forEach((file) => {
             if (file) {
-                const mimetype = mime.extension(file.mimetype);
-                const fileName = `${file.filename}.${mimetype}`;
+                const fileName = `[${file.filename}]-${file.originalname}`;
 
                 (new OneCerService(req.query.api.toString(), req.headers)).uploadFile({ fileName, idOwner: req.body.idOwner })
                     .then((response) => {
