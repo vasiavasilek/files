@@ -70,7 +70,7 @@ class OneCerService {
     public uploadFile = async (data: Record<string, any>): Promise<{name?: string; id?: string;}> => {
         try {
             const response = await this.request<IOneCerUploadResponse>({
-                url: '/files/data/add',
+                url: '/add',
                 method: 'POST',
                 data,
             });
