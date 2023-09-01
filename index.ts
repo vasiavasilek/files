@@ -45,8 +45,9 @@ app.get('/get', (req, res) => {
         .then((response) => {
             if (typeof response.filePath === 'string') {
                 res.sendFile(response.filePath);
+            } else {
+                res.status(404);
             }
-            res.status(404);
         })
         .catch((err) => {
             res.send(err);
