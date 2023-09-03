@@ -14,8 +14,12 @@ const app = express();
 
 app.use(bodyParser.urlencoded({
     extended: true,
+    limit: '1024mb',
 }));
-app.use(bodyParser.json());
+
+app.use(bodyParser.json({
+    limit: '1024mb',
+}));
 
 const server = http.createServer(app);
 const port = process.env.PORT || 9000;
@@ -72,7 +76,17 @@ app.post('/upload', upload.array('files'), (req, res) => {
             }
         });
     }
-    res.send(`Files uploaded - ${JSON.stringify(req.files)}`);
+    res.send(req.files);
+});
+
+app.post('/saveText', (req, res) => {
+    (new OneCerService(req.query.api.toString(), req.headers)).uploadFile({ fileName: req.body.fileName, idOwner: req.body.idOwner })
+        .then((response) => {
+            res.send(response);
+            if (typeof response.name === 'string') {
+                fs.writeFileSync(response.name, req.body.text);
+            }
+        });
 });
 
 server.listen(port, () => {
