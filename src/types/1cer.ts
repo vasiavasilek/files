@@ -10,3 +10,8 @@ export interface IOneCerGetResponse {
 export interface IOneCerDeleteResponse {
     error: boolean;
 }
+
+export interface IUploadedFileResponse {
+    idFile: string;
+    name: string;
+}

@@ -36,8 +36,8 @@ app.post('/delete', (req, res) => {
 
 app.get('/get', (req, res) => {
     const body = {
-        id: req.query.id,
-        idOwner: req.query.idOwner,
+        id: req.query.id as string,
+        idOwner: req.query.idOwner as string,
     };
 
     const headers = {
@@ -80,13 +80,36 @@ app.post('/upload', upload.array('files'), (req, res) => {
 });
 
 app.post('/saveText', (req, res) => {
-    (new OneCerService(req.query.api.toString(), req.headers)).uploadFile({ fileName: req.body.fileName, idOwner: req.body.idOwner })
-        .then((response) => {
-            res.send(response);
-            if (typeof response.name === 'string') {
-                fs.writeFileSync(response.name, req.body.text);
+    const cerService = new OneCerService(req.query.api.toString(), req.headers);
+
+    const createTextFile = () => {
+        cerService.uploadFile({ fileName: req.body.fileName, idOwner: req.body.idOwner })
+            .then((response) => {
+                if (typeof response.name === 'string') {
+                    fs.writeFileSync(response.name, req.body.text);
+                }
+            });
+    };
+
+    cerService.getFiles({ id: req.body.idOwner })
+        .then((files) => {
+            const targetFile = files.find((el) => el.name === req.body.fileName);
+            if (targetFile && typeof targetFile.idFile === 'string') {
+                cerService.getFile({ id: targetFile.idFile, idOwner: req.body.idOwner })
+                    .then(({ filePath }) => {
+                        if (typeof filePath === 'string') {
+                            fs.writeFileSync(filePath, req.body.text);
+                        } else {
+                            cerService.deleteFile({ id: targetFile.idFile })
+                                .then(createTextFile);
+                        }
+                    });
+            } else {
+                createTextFile();
             }
         });
+
+    res.send(req.body);
 });
 
 server.listen(port, () => {

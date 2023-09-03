@@ -1,6 +1,8 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { IncomingHttpHeaders } from 'http';
-import { IOneCerDeleteResponse, IOneCerGetResponse, IOneCerUploadResponse } from '../types/1cer';
+import {
+    IOneCerDeleteResponse, IOneCerGetResponse, IOneCerUploadResponse, IUploadedFileResponse,
+} from '../types/1cer';
 
 class OneCerService {
     private api: string;
@@ -47,7 +49,7 @@ class OneCerService {
      * Запрос на получение файла
      * @param data - параметры запроса
      */
-    public getFile = async (data: Record<string, any>): Promise<{filePath?: string}> => {
+    public getFile = async (data: { id: string; idOwner: string; }): Promise<{filePath?: string}> => {
         try {
             const response = await this.request<IOneCerGetResponse>({
                 url: '/get',
@@ -59,6 +61,19 @@ class OneCerService {
             };
         } catch (err) {
             return {};
+        }
+    };
+
+    public getFiles = async (data: {id: string}): Promise<IUploadedFileResponse[]> => {
+        try {
+            const response = await this.request<{error: boolean; data: IUploadedFileResponse[]}>({
+                baseURL: `${this.api}/files/list/data`,
+                method: 'POST',
+                data,
+            });
+            return response.data && Array.isArray(response.data.data) ? response.data.data : [];
+        } catch (err) {
+            return [];
         }
     };
 
