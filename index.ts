@@ -61,7 +61,7 @@ app.post('/upload', upload.array('files'), (req, res) => {
     if (Array.isArray(req.files)) {
         req.files.forEach((file) => {
             if (file) {
-                const fileName = `[${file.filename}]-${file.originalname}`;
+                const fileName = `[${file.filename}]-${Buffer.from(file.originalname, 'latin1').toString('utf8')}`;
 
                 (new OneCerService(req.query.api.toString(), req.headers)).uploadFile({ fileName, idOwner: req.body.idOwner })
                     .then((response) => {
