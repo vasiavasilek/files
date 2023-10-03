@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { IncomingHttpHeaders } from 'http';
 import {
     IOneCerDeleteResponse, IOneCerGetResponse, IOneCerUploadResponse, IUploadedFileResponse,
@@ -27,6 +27,22 @@ class OneCerService {
     });
 
     /**
+     * Шаблон запроса с таймаутом
+     * @param config - параметры запроса
+     */
+    private requestWithTimeout = <T>(timeout: number, config?: AxiosRequestConfig) => new Promise<AxiosResponse<T>>((resolve, reject) => {
+        const timeoutInstance = setTimeout(() => {
+            resolve(undefined);
+        }, timeout);
+        this.request<T>(config)
+            .then((response) => {
+                clearTimeout(timeoutInstance);
+                resolve(response);
+            })
+            .catch((err) => reject(err));
+    });
+
+    /**
      * Запрос на удаление файла
      * @param data - параметры запроса
      */
@@ -51,13 +67,13 @@ class OneCerService {
      */
     public getFile = async (data: { id: string; idOwner: string; }): Promise<{filePath?: string}> => {
         try {
-            const response = await this.request<IOneCerGetResponse>({
+            const response = await this.requestWithTimeout<IOneCerGetResponse>(5000, {
                 url: '/get',
                 method: 'POST',
                 data,
             });
             return {
-                filePath: response.data.name,
+                filePath: response?.data?.name,
             };
         } catch (err) {
             return {};

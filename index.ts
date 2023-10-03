@@ -49,7 +49,7 @@ app.get('/get', (req, res) => {
             if (typeof response.filePath === 'string') {
                 res.sendFile(response.filePath);
             } else {
-                res.status(404);
+                res.status(404).send();
             }
         })
         .catch((err) => {
