@@ -22,6 +22,7 @@ app.use(bodyParser.json({
 }));
 
 const server = http.createServer(app);
+server.setTimeout(600000);
 const port = process.env.PORT || 9000;
 
 app.post('/delete', (req, res) => {
