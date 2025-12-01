@@ -83,32 +83,45 @@ app.post('/upload', upload.array('files'), (req, res) => {
 app.post('/saveText', (req, res) => {
     const cerService = new OneCerService(req.query.api.toString(), req.headers);
 
-    const createTextFile = () => {
-        cerService.uploadFile({ fileName: req.body.fileName, idOwner: req.body.idOwner })
-            .then((response) => {
-                if (typeof response.name === 'string') {
+    cerService.uploadFile({ fileName: req.body.fileName, idOwner: req.body.idOwner })
+        .then((response) => {
+            if (typeof response.name === 'string') {
+                try {
+                    fs.unlinkSync(response.name);
+                } catch (err) {
+                    console.log(err);
+                } finally {
                     fs.writeFileSync(response.name, req.body.text);
                 }
-            });
-    };
-
-    cerService.getFiles({ id: req.body.idOwner })
-        .then((files) => {
-            const targetFile = files.find((el) => el.name === req.body.fileName);
-            if (targetFile && typeof targetFile.idFile === 'string') {
-                cerService.getFile({ id: targetFile.idFile, idOwner: req.body.idOwner })
-                    .then(({ filePath }) => {
-                        if (typeof filePath === 'string') {
-                            fs.writeFileSync(filePath, req.body.text);
-                        } else {
-                            cerService.deleteFile({ id: targetFile.idFile })
-                                .then(createTextFile);
-                        }
-                    });
-            } else {
-                createTextFile();
             }
         });
+
+    // const createTextFile = () => {
+    //     cerService.uploadFile({ fileName: req.body.fileName, idOwner: req.body.idOwner })
+    //         .then((response) => {
+    //             if (typeof response.name === 'string') {
+    //                 fs.writeFileSync(response.name, req.body.text);
+    //             }
+    //         });
+    // };
+
+    // cerService.getFiles({ id: req.body.idOwner })
+    //     .then((files) => {
+    //         const targetFile = files.find((el) => el.name === req.body.fileName);
+    //         if (targetFile && typeof targetFile.idFile === 'string') {
+    //             cerService.getFile({ id: targetFile.idFile, idOwner: req.body.idOwner })
+    //                 .then(({ filePath }) => {
+    //                     if (typeof filePath === 'string') {
+    //                         fs.writeFileSync(filePath, req.body.text);
+    //                     } else {
+    //                         cerService.deleteFile({ id: targetFile.idFile })
+    //                             .then(createTextFile);
+    //                     }
+    //                 });
+    //         } else {
+    //             createTextFile();
+    //         }
+    //     });
 
     res.send(req.body);
 });
